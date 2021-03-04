@@ -47,7 +47,7 @@ class ImageFolder:
         for image_path in self.filepaths:
             image = Image.open(image_path).convert('RGB')
             shape = image.size
-            image = F.to_tensor(image)
             image = F.resize(image, self.target_size, interpolation=Image.BILINEAR)
+            image = F.to_tensor(image)
             image = F.normalize(image, mean=0.5, std=0.5)
             yield image, shape, image_path

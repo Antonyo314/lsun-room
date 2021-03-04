@@ -4,10 +4,9 @@ import cv2
 import numpy as np
 import torch
 from loguru import logger
-
 from datasets import sequence
 from trainer import core
-
+import os
 torch.backends.cudnn.benchmark = True
 
 
@@ -36,16 +35,14 @@ def cli():
 @click.option('--weight', type=click.Path(exists=True))
 @click.option('--image_size', default=320, type=int)
 def image(path, weight, image_size):
-    logger.info('Press `q` to exit the sequence inference.')
     predictor = Predictor(weight_path=weight)
     images = sequence.ImageFolder(image_size, path)
-
-    for image, shape, _ in images:
+    os.makedirs('result', exist_ok=True)
+    for image, shape, path in images:
         output = cv2.resize(predictor.feed(image), shape)
-        cv2.imshow('layout', output[..., ::-1])
-        if cv2.waitKey(0) & 0xFF == ord('q'):
-            break
-
+        path = str(path)
+        output_path = f"result/{path.split('/')[-1]}"
+        cv2.imwrite(output_path, (output[..., ::-1] * 255).astype(np.uint8))
 
 @cli.command()
 @click.option('--path', type=click.Path(exists=True))
